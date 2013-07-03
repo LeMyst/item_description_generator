@@ -14,7 +14,7 @@ foreach($lines as $line) {
 	}
 	$const[strtolower($line[0])] = intval($line[1]);
 }
-#print_r($const);
+
 function const_v($value) {
 	global $const;
 	if( isset($const[strtolower($value)]) ) {

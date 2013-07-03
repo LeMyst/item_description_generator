@@ -31,9 +31,9 @@ $equipJobs = array(
 
 $equipUpper = array(
 	1 => 'Normal',
-	2 => 'Reborn and Third',
-	4 => 'Baby',
-	8 => 'Third Only',
+	2 => 'Trans and Third Classes',
+	4 => 'Baby Classes',
+	8 => 'Third Classes',
 );
 
 $weapons = array(
@@ -59,7 +59,8 @@ $weapons = array(
 	19 => 'Gatling Gun',
 	20 => 'Shotgun',
 	21 => 'Grenade Launcher',
-	22 => 'Fuuma Shuriken'
+	22 => 'Fuuma Shuriken',
+	23 => 'Two-Handed Staff',
 );
 
 $ammo = array(
@@ -103,7 +104,7 @@ $types = array(
 	7 => 'Pet Egg',
 	8 => 'Pet Equipment',
 	//9 => 'Unknown2',
-	10 => 'Arrow / Ammo',
+	10 => 'Ammo',
 	11 => 'Usable : Delay Consumption',
 	17 => 'Throw Weapon', 
 	18 => 'Cash Shop Reward',

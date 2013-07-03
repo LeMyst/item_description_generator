@@ -11,8 +11,8 @@ ini_set("display_errors", 1);
 require 'core/const.php';
 require 'core/db.php';
 require 'core/types.php';
-//require 'core.script.php';
-//require 'core.bonus.php';
+require 'core/script.php';
+require 'core/bonus.php';
 
 //require 'db.pet.php';
 //require 'db.skill.php';
@@ -34,7 +34,7 @@ $error = fopen($error, 'w') or exit("Unable to open $error");
 # Global Vars
 #############
 $item_id = 0;
-$count = 100;
+$count = 300;
 
 
 # Loop every item in item_db.txt
@@ -44,21 +44,23 @@ for($i = 0; $i <= $count; $i++){
 	if(preg_match('/(\d*),(\D*?),(\D*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(.*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),\{(.*?)\},\{(.*?)\},\{(.*?)\}/', $line, $m)) {
 		// ID,AegisName,Name,Type,Buy,Sell,Weight,ATK,MATK,DEF,Range,Slots,Job,Upper,Gender,Loc,wLV,eLV,Refineable,View,{ Script },{ OnEquip_Script },{ OnUnequip_Script }
 		// 1  2         3    4    5   6    7      8   9    10  11    12    13  14    15     16  17  18  19         20     21          22                23
-		desc($m[2] . " {");
-			item_type($m[4], $m[20], $m[16]);
-			item_weight($m[7]);
-			item_attack($m[8]);
-			item_mattack($m[9]);
-			item_def($m[10]);
-			item_gender($m[15]);
-			item_weaplvl($m[17]);
-			item_reqlvl($m[18]);
-			if( $m[4] == 4 || $m[4] == 5 ) {
-				item_refinable($m[19]);
-				item_upper($m[14]);
-				item_job($m[13]);
-			}
-		desc("}\r\n");
+		$item_id = $m[1];
+		item_script($m[21]);
+		#desc($m[2] . " {");
+			#item_type($m[4], $m[20], $m[16]);
+			#item_weight($m[7]);
+			#item_attack($m[8]);
+			#item_mattack($m[9]);
+			#item_def($m[10]);
+			#item_gender($m[15]);
+			#item_weaplvl($m[17]);
+			#item_reqlvl($m[18]);
+			#if( $m[4] == 4 || $m[4] == 5 ) {
+			#	item_refinable($m[19]);
+			#	item_upper($m[14]);
+			#	item_job($m[13]);
+			#}
+		#desc("}\r\n");
 	}
 }
 
@@ -72,14 +74,14 @@ function desc($mes) {
 function item_script($script) {
 	global $item_id;
 	$descript = '';
-	while( ($bs=bonus_str($script)) != '' ){
+	while( ($bs=bonus_str($script)) != '' ) {
 		$descript .= "\t" . $bs . "\r\n";
 	}
 	echo "-=$item_id=-\r\n$descript\r\n";
 }
 
 function item_upper($upper) {
-	if($upper === "") {
+	if($upper === "" || $upper == "7") {
 		return;
 	}
 	global $equipUpper, $item_id;
@@ -122,24 +124,21 @@ function item_job($job) {
 		return;
 	} else {
 		$job = hexdec($job);
-		if(reset(unpack("l", pack("l", $job))) < 0) {
-			// All job except
+		foreach( $equipJobs as $bit => $name ) {
+			if ($job & $bit) {
+				$jobs[] = $name;
+			}
+		}
+		$jobs_ = implode(' / ', $jobs);
+		if( count($jobs) > 20 ) { # refine this value
 			foreach ($equipJobs as $bit => $name) {
 				if (!($job & $bit)) {
 					$jobs[] = $name;
 				}
 			}
-			$jobs = "All Jobs except " . implode(' / ', $jobs) . " Class";
-		} else {
-			// Specific Jobs
-			foreach ($equipJobs as $bit => $name) {
-				if ($job & $bit) {
-					$jobs[] = $name;
-				}
-			}
-			$jobs = implode(' / ', $jobs) . " Class";
+			$jobs_ = "All Jobs except " . implode(' / ', $jobs);
 		}
-		desc("\tJob :^777777 $jobs ^000000");
+		desc("\tJob :^777777 $jobs_ ^000000");
 	}
 }
 
