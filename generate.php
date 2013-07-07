@@ -14,7 +14,7 @@ require 'core/types.php';
 require 'core/script.php';
 require 'core/bonus.php';
 
-//require 'db.pet.php';
+require 'db/pet.php';
 //require 'db.skill.php';
 
 # Input Files
@@ -34,12 +34,13 @@ $error = fopen($error, 'w') or exit("Unable to open $error");
 # Global Vars
 #############
 $item_id = 0;
-$count = 300;
+$count = 1000;
 
 
 # Loop every item in item_db.txt
 # while (!feof($item_db)) {
 for($i = 0; $i <= $count; $i++){
+	#echo "$i\r\n";
 	$line = fgets($item_db);
 	if(preg_match('/(\d*),(\D*?),(\D*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(.*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),\{(.*?)\},\{(.*?)\},\{(.*?)\}/', $line, $m)) {
 		// ID,AegisName,Name,Type,Buy,Sell,Weight,ATK,MATK,DEF,Range,Slots,Job,Upper,Gender,Loc,wLV,eLV,Refineable,View,{ Script },{ OnEquip_Script },{ OnUnequip_Script }
@@ -73,11 +74,9 @@ function desc($mes) {
 
 function item_script($script) {
 	global $item_id;
-	$descript = '';
-	while( ($bs=bonus_str($script)) != '' ) {
-		$descript .= "\t" . $bs . "\r\n";
-	}
-	echo "-=$item_id=-\r\n$descript\r\n";
+	echo "-=$item_id=-\r\n";
+	$descript = bonus_str($script);
+	
 }
 
 function item_upper($upper) {

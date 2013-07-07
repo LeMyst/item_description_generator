@@ -1,14 +1,112 @@
 <?php
-
-function bonus_str(&$bonus) {
-	global $item_id;
+$desc = array();
+$tabs = 1;
+function bonus_str($bonus) {
+	global $item_id, $desc, $tabs;
 	$bonus = trim($bonus); // trim whitespace
-	if( ($ptr = strpos($bonus, ' ')) < 1 ) {
-		// check for whitespace between command and params
-		$bonus = '';
-		return '';
+	
+	while($bonus != ""){
+		if(substr($bonus, 0, 2) == "if" || substr($bonus, 0, 7) == "else if"){
+			if(substr($bonus, 0, 7) == "else if"){
+				$elsie = true;
+			} else {
+				$elsie = false;
+			}
+			$in_brace = 0;
+			$len = strlen($bonus);
+			$start = strpos($bonus, "(") + 1;
+			for($ptr = $start; $ptr <= $len; $ptr++){
+				if($bonus{$ptr} == '('){
+					$in_brace++;	
+				} elseif($bonus{$ptr} == ')' && $in_brace) {
+					$in_brace--;
+				} elseif($bonus{$ptr} == ')' && !$in_brace){
+					$end = $ptr - $start;
+					break;
+				}
+			}
+			$condition = substr($bonus, $start, $end);
+			$bonus = trim(substr($bonus, $ptr+1));
+			if(substr($bonus, 0, 1) == "{"){
+				$in_brace = 0;
+				$len = strlen($bonus);
+				$start = strpos($bonus, "{") + 1;
+				for($ptr = $start; $ptr <= $len; $ptr++){
+					if($bonus{$ptr} == '{'){
+						$in_brace++;	
+					} elseif($bonus{$ptr} == '}' && $in_brace) {
+						$in_brace--;
+					} elseif($bonus{$ptr} == '}' && !$in_brace){
+						$end = $ptr - $start;
+						break;
+					}
+				}
+				$statements = trim(substr($bonus, $start, $end));
+				$bonus = trim(substr($bonus, $ptr + 1));
+			} else {
+				$statements = $bonus;
+				$bonus = "";
+			}
+			# todo - parse the condition
+			if($elsie){
+				echo "\telseif($condition)\r\n";
+			} else {
+				echo "\tif($condition)\r\n";
+			}
+			$tabs++;
+			bonus_str($statements);
+			$tabs--;
+		} elseif(substr($bonus, 0, 4) == "else"){
+			$bonus = trim(substr($bonus,4));
+			if(substr($bonus, 0, 1) == "{"){
+				$in_brace = 0;
+				$len = strlen($bonus);
+				$start = strpos($bonus, "{") + 1;
+				for($ptr = $start; $ptr <= $len; $ptr++){
+					if($bonus{$ptr} == '{'){
+						$in_brace++;	
+					} elseif($bonus{$ptr} == '}' && $in_brace) {
+						$in_brace--;
+					} elseif($bonus{$ptr} == '}' && !$in_brace){
+						$end = $ptr - $start;
+						break;
+					}
+				}
+				$statements = trim(substr($bonus, $start, $end));
+				$bonus = trim(substr($bonus, $ptr + 1));
+			} else {
+				$statements = $bonus;
+				$bonus = "";
+			}
+			echo "\telse\r\n";
+			$tabs++;
+			bonus_str($statements);
+			$tabs--;
+		} else {
+			# todo - skip ; inside braces
+			$ptr = strpos($bonus, ';');
+			if( $ptr < 1 ) {
+				err(" $bonus missing statement");
+				$bonus = '';
+			}
+			$statement = trim(substr($bonus, 0, $ptr+1));
+			$bonus = trim(substr($bonus, $ptr+1));
+			echo str_repeat("\t", $tabs);
+			echo statement_parser($statement) . "\r\n";
+		}
 	}
-	$cmd = strtolower(substr($bonus, 0, $ptr)); // grab the command
+}
+
+
+function statement_parser($statement){
+	global $item_id;
+	// locate whitespace between command and params
+	if( ($ptr = strpos($statement, ' ')) < 1 ) {
+		err("$statement missing whitespace");
+		return;
+	}
+	
+	$cmd = strtolower(substr($statement, 0, $ptr)); // grab the command
 	$parser = ''; // $parseFunction
 	switch($cmd) {
 		case 'itemheal':
@@ -18,24 +116,20 @@ function bonus_str(&$bonus) {
 		case 'sc_start':
 			$parser = 'parse_sc';
 			break;
+		case 'pet':
+			$parser = 'parse_pet';
+			break;
 		default:
-			$mes = "$item_id - Unknown [$bonus]";
-			err($mes);
-			return;
+			return $statement;
+			break;
 	}
-	$params = line_split( substr($bonus, $ptr+1), 1, 1);
-	$ptr = strpos($bonus, ';');
-	if( $ptr < 1 ) {
-		$bonus = '';
-	} else {
-		$bonus = substr($bonus, ++$ptr);
-		$i = count($params) - 1;
-		$params[$i] = substr($params[$i], 0, strpos($params[$i], ';'));
-		$params[$i] = const_v($params[$i]);
-	}
+	$params = param_split( substr($statement, $ptr+1), 1);
+	$i = count($params) - 1;
+	$params[$i] = substr($params[$i], 0, strpos($params[$i], ';'));
+	$params[$i] = const_v($params[$i]);
+	
 	return $parser($cmd, $params);
 }
-
 
 
 # Parser Functions
@@ -81,9 +175,8 @@ function parse_itemheal($cmd, $params) {
 	err('itemheal fucked up (both 0)');
 }
 
-function parse_sc($cmd, $params){
+function parse_sc($cmd, $params) {
 	$sn = bonus_status_name($params[0]);
-  
 	if( $cmd == 'sc_end' ) {
 		return sprintf('Cures %s.', $sn);
 	} else {
@@ -95,6 +188,10 @@ function parse_sc($cmd, $params){
 	}
 }
 
-
+function parse_pet($cmd, $params) {
+	global $pet_db;
+	$pet = $pet_db[$params[0]][3];
+	return sprintf('Pet taming item for %s.', $pet);
+}
 
 ?>
