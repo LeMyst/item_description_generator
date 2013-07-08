@@ -83,14 +83,24 @@ function bonus_str($bonus) {
 			bonus_str($statements);
 			$tabs--;
 		} else {
-			# todo - skip ; inside braces
-			$ptr = strpos($bonus, ';');
+			$len = strlen($bonus);
+			$in_brace = 0;
+			for($ptr = 0; $ptr <= $len; $ptr++){
+				if($bonus{$ptr} == '{'){
+					$in_brace++;	
+				} elseif($bonus{$ptr} == '}') {
+					$in_brace--;
+				} elseif($bonus{$ptr} == ';' && !$in_brace){
+					break;
+				}
+			}
 			if( $ptr < 1 ) {
 				err(" $bonus missing statement");
 				$bonus = '';
 			}
 			$statement = trim(substr($bonus, 0, $ptr+1));
 			$bonus = trim(substr($bonus, $ptr+1));
+			# Todo - Fix nested else tabs
 			echo str_repeat("\t", $tabs);
 			echo statement_parser($statement) . "\r\n";
 		}
