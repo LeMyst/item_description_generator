@@ -1,11 +1,21 @@
 <?php
 $desc = array();
 $tabs = 1;
+$tmp = false;
+$nobrace = false;
+
 function bonus_str($bonus) {
-	global $item_id, $desc, $tabs;
+	global $item_id, $desc, $tabs, $nobrace;
 	$bonus = trim($bonus); // trim whitespace
 	
 	while($bonus != ""){
+		if(substr($bonus, 0, 1) == ";"){
+			$bonus = substr($bonus, 1);
+			$bonus = trim($bonus);
+			if(!strlen($bonus)) {
+				return;
+			}
+		}
 		if(substr($bonus, 0, 2) == "if" || substr($bonus, 0, 7) == "else if"){
 			if(substr($bonus, 0, 7) == "else if"){
 				$elsie = true;
@@ -44,18 +54,21 @@ function bonus_str($bonus) {
 				$statements = trim(substr($bonus, $start, $end));
 				$bonus = trim(substr($bonus, $ptr + 1));
 			} else {
+				$nobrace = true;
 				$statements = $bonus;
 				$bonus = "";
 			}
 			# todo - parse the condition
 			if($elsie){
-				echo "\telseif($condition)\r\n";
+				desc("\r\n".str_repeat("\t", $tabs)."} elseif($condition) {");
 			} else {
-				echo "\tif($condition)\r\n";
+				desc("\r\n".str_repeat("\t", $tabs)."if($condition) {");
 			}
 			$tabs++;
 			bonus_str($statements);
 			$tabs--;
+			desc("\r\n".str_repeat("\t", $tabs)."}");
+			
 		} elseif(substr($bonus, 0, 4) == "else"){
 			$bonus = trim(substr($bonus,4));
 			if(substr($bonus, 0, 1) == "{"){
@@ -78,10 +91,18 @@ function bonus_str($bonus) {
 				$statements = $bonus;
 				$bonus = "";
 			}
-			echo "\telse\r\n";
+			if($nobrace) {
+				$tabs--;
+				desc("\r\n".str_repeat("\t", $tabs)."} else {");
+			} else {
+				desc(" else {");
+			}
 			$tabs++;
 			bonus_str($statements);
-			$tabs--;
+			if(!$nobrace){
+				$tabs--;
+				desc("\r\n".str_repeat("\t", $tabs)."}");
+			}
 		} else {
 			$len = strlen($bonus);
 			$in_brace = 0;
@@ -101,8 +122,8 @@ function bonus_str($bonus) {
 			$statement = trim(substr($bonus, 0, $ptr+1));
 			$bonus = trim(substr($bonus, $ptr+1));
 			# Todo - Fix nested else tabs
-			echo str_repeat("\t", $tabs);
-			echo statement_parser($statement) . "\r\n";
+			desc(str_repeat("\t", $tabs));
+			desc("\r\n".str_repeat("\t", $tabs) . statement_parser($statement));
 		}
 	}
 }
@@ -112,7 +133,7 @@ function statement_parser($statement){
 	global $item_id;
 	// locate whitespace between command and params
 	if( ($ptr = strpos($statement, ' ')) < 1 ) {
-		err("$statement missing whitespace");
+		err("$item_id $statement missing whitespace");
 		return;
 	}
 	
@@ -129,12 +150,16 @@ function statement_parser($statement){
 		case 'pet':
 			$parser = 'parse_pet';
 			break;
+		//case 'bonus':
+			//$parser = 'parse_bonus';
+		//	break;
 		default:
 			return $statement;
 			break;
 	}
 	$params = param_split( substr($statement, $ptr+1), 1);
 	$i = count($params) - 1;
+	//print_r($params);
 	$params[$i] = substr($params[$i], 0, strpos($params[$i], ';'));
 	$params[$i] = const_v($params[$i]);
 	
@@ -174,26 +199,25 @@ function parse_itemheal($cmd, $params) {
 	} else {
 		$sp = intval($params[1]);
 	}
-
 	if( $hp && $sp )
-		return sprintf('Restores %s HP and %s SP.', $hp, $sp);
+		return sprintf('Restores ^000088%s HP and %s SP^000000.', $hp, $sp);
 	elseif( $hp )
-		return sprintf('Restores %s HP.', $hp);
+		return sprintf('Restores ^000088%s HP^000000.', $hp);
 	elseif( $sp )
-		return sprintf('Restores %s SP.', $sp);
+		return sprintf('Restores ^000088%s SP^000000.', $sp);
 		
 	err('itemheal fucked up (both 0)');
 }
 
 function parse_sc($cmd, $params) {
-	$sn = bonus_status_name($params[0]);
 	if( $cmd == 'sc_end' ) {
-		return sprintf('Cures %s.', $sn);
+		return bonus_sc_end($params[0]);
 	} else {
-		if( $params[2] > 0 ) {
-			return sprintf('%s (lv. %d) for %d seconds.', $sn, $params[2], $params[1] / 1000);
+		$params[1] = secondsToTime($params[1]/1000);
+		if( $params[2] !== "0" ) {
+			return bonus_sc_start2($params[0], $params[1], $params[2]);
 		} else {
-			return sprintf('%s for %d seconds.', $sn, $params[1] / 1000);
+			return bonus_sc_start($params[0], $params[1]);
 		}
 	}
 }
@@ -201,7 +225,7 @@ function parse_sc($cmd, $params) {
 function parse_pet($cmd, $params) {
 	global $pet_db;
 	$pet = $pet_db[$params[0]][3];
-	return sprintf('Pet taming item for %s.', $pet);
+	return sprintf('Pet taming item for ^000088%s^000000.', $pet);
 }
 
 ?>

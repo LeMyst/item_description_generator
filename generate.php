@@ -34,12 +34,12 @@ $error = fopen($error, 'w') or exit("Unable to open $error");
 # Global Vars
 #############
 $item_id = 0;
-$count = 1000;
+$count = 2000;
 
 
 # Loop every item in item_db.txt
-# while (!feof($item_db)) {
-for($i = 0; $i <= $count; $i++){
+while (!feof($item_db)) {
+//for($i = 0; $i <= $count; $i++){
 	#echo "$i\r\n";
 	$line = fgets($item_db);
 	if(preg_match('/(\d*),(\D*?),(\D*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(.*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),\{(.*?)\},\{(.*?)\},\{(.*?)\}/', $line, $m)) {
@@ -67,15 +67,18 @@ for($i = 0; $i <= $count; $i++){
 
 function desc($mes) {
 	global $desc_out;
-	fwrite($desc_out, $mes . "\r\n");
-	echo $mes . "\r\n";
+	fwrite($desc_out, $mes);
+	echo $mes;
 }
 
 
 function item_script($script) {
-	global $item_id;
-	echo "-=$item_id=-\r\n";
+	global $item_id, $tabs, $nobrace;
+	echo "\r\n-=$item_id=-\r\n";
+	$tabs = 1;
+	$nobrace = false;
 	$descript = bonus_str($script);
+	
 	
 }
 

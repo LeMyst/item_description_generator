@@ -45,4 +45,59 @@ function strip_comment($line) {
 	return $line;
 }
 
+
+function secondsToTime($seconds) {
+	$orig = $seconds;
+	// extract days
+	$days = floor($seconds / 3600 / 24);
+
+	// extract hours
+	$hours = floor($seconds / 3600) - $days*24;
+
+	// extract minutes
+	$divisor_for_minutes = $seconds % 3600;
+	$minutes = floor($divisor_for_minutes / 60);
+
+	// extract the remaining seconds
+	$divisor_for_seconds = $divisor_for_minutes % 60;
+	$seconds = ceil($divisor_for_seconds);
+
+	// return the final array
+	$obj = array(
+		"d" => (int) $days,
+		"h" => (int) $hours,
+		"m" => (int) $minutes,
+		"s" => (int) $seconds,
+	);
+
+	if (!$obj["d"] && !$obj["h"] && !$obj["m"]) {
+		if($obj["s"] > 1) {
+			return $obj["s"] . " Seconds";
+		} else {
+			return $obj["s"] . " Second";
+		}
+	}
+	if (!$obj["d"] && !$obj["h"] && !$obj["s"]) {
+		if($obj["m"] > 1) {
+			return $obj["m"] . " Minutes";
+		} else {
+			return $obj["m"] . " Minute";
+		}
+	}
+	if (!$obj["d"] && !$obj["m"] && !$obj["s"]) {
+		if($obj["h"] > 1) {
+			return $obj["h"] . " Hours";
+		} else {
+			return $obj["h"] . " Hour";
+		}
+	}
+	if (!$obj["d"] && !$obj["h"]) {
+		if($obj["m"] > 1) {
+			return $obj["m"] . " Mins " . $obj["s"] . " Seconds";
+		} else {
+			return $obj["m"] . " Min " . $obj["s"] . " Seconds";
+		}
+	}
+	die("HERE");
+}
 ?>
