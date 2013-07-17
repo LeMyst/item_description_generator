@@ -39,15 +39,15 @@ $count = 2000;
 
 # Loop every item in item_db.txt
 while (!feof($item_db)) {
-//for($i = 0; $i <= $count; $i++){
+#for($i = 0; $i <= $count; $i++){
 	#echo "$i\r\n";
 	$line = fgets($item_db);
 	if(preg_match('/(\d*),(\D*?),(\D*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(.*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),\{(.*?)\},\{(.*?)\},\{(.*?)\}/', $line, $m)) {
 		// ID,AegisName,Name,Type,Buy,Sell,Weight,ATK,MATK,DEF,Range,Slots,Job,Upper,Gender,Loc,wLV,eLV,Refineable,View,{ Script },{ OnEquip_Script },{ OnUnequip_Script }
 		// 1  2         3    4    5   6    7      8   9    10  11    12    13  14    15     16  17  18  19         20     21          22                23
 		$item_id = $m[1];
-		item_script($m[21]);
-		#desc($m[2] . " {");
+		desc($m[2] . " {");
+			item_script($m[21]);
 			#item_type($m[4], $m[20], $m[16]);
 			#item_weight($m[7]);
 			#item_attack($m[8]);
@@ -61,7 +61,7 @@ while (!feof($item_db)) {
 			#	item_upper($m[14]);
 			#	item_job($m[13]);
 			#}
-		#desc("}\r\n");
+		desc("}\r\n");
 	}
 }
 
@@ -78,8 +78,7 @@ function item_script($script) {
 	$tabs = 1;
 	$nobrace = false;
 	$descript = bonus_str($script);
-	
-	
+	desc("\r\n");
 }
 
 function item_upper($upper) {
@@ -93,20 +92,20 @@ function item_upper($upper) {
 			$arr[] = $name;
 		}
 	}
-	desc("\tClass :^777777 " . implode(' / ', $arr) . "^000000");
+	desc("\tClass :^777777 " . implode(' / ', $arr) . "^000000" . "\r\n");
 }
 
 function item_refinable($refine) {
 	if($refine === "1") {
-		desc("\tRefinable :^777777 Yes^000000");
+		desc("\tRefinable :^777777 Yes^000000" . "\r\n");
 	} else {
-		desc("\tRefinable :^777777 No^000000");
+		desc("\tRefinable :^777777 No^000000" . "\r\n");
 	}
 }
 
 function item_slots($slots) {
 	if($slots > 0) {
-		desc("\tSlots :^777777 $slots ^000000");
+		desc("\tSlots :^777777 $slots ^000000" . "\r\n");
 	}
 }
 
@@ -116,13 +115,13 @@ function item_job($job) {
 	$jobs = array();
 
 	if($job == 0xFFFFFFFF) {
-		desc("\tJob :^777777 All Jobs^000000");
+		desc("\tJob :^777777 All Jobs^000000" . "\r\n");
 		return;
 	} elseif($job === "") {
-		desc("\tJob :^777777 All Jobs^000000");
+		desc("\tJob :^777777 All Jobs^000000" . "\r\n");
 		return;
 	} elseif($job == 0xFFFFFFFE) {
-		desc("\tJob :^777777 All Jobs except Novice^000000");
+		desc("\tJob :^777777 All Jobs except Novice^000000" . "\r\n");
 		return;
 	} else {
 		$job = hexdec($job);
@@ -140,7 +139,7 @@ function item_job($job) {
 			}
 			$jobs_ = "All Jobs except " . implode(' / ', $jobs);
 		}
-		desc("\tJob :^777777 $jobs_ ^000000");
+		desc("\tJob :^777777 $jobs_ ^000000" . "\r\n");
 	}
 }
 
@@ -149,9 +148,9 @@ function item_gender($sex) {
 	if($sex === "2" || $sex === "") {
 		return;
 	} elseif($sex === "1") {
-		desc("\tGender :^777777 Male^000000");
+		desc("\tGender :^777777 Male^000000" . "\r\n");
 	} elseif($sex === "0") {
-		desc("\tGender :^777777 Female^000000");
+		desc("\tGender :^777777 Female^000000" . "\r\n");
 	} else {
 		echo "invalid sex $sex @ $item_id\r\n";
 	}
@@ -159,39 +158,39 @@ function item_gender($sex) {
 
 function item_mattack($value) {
 	if($value) {
-		desc("\tMagic Attack :^777777 $value^000000");
+		desc("\tMagic Attack :^777777 $value^000000" . "\r\n");
 	}
 }
 
 
 function item_attack($value) {
 	if($value) {
-		desc("\tAttack :^777777 $value^000000");
+		desc("\tAttack :^777777 $value^000000" . "\r\n");
 	}
 }
 
 function item_weaplvl($lvl) {
 	if($lvl) {
-		desc("\tWeapon Level :^777777 $lvl^000000");
+		desc("\tWeapon Level :^777777 $lvl^000000" . "\r\n");
 	}
 }
 
 function item_reqlvl($lvl) {
 	if($lvl) {
-		desc("\tRequired Level :^777777 $lvl^000000");
+		desc("\tRequired Level :^777777 $lvl^000000" . "\r\n");
 	}
 }
 
 function item_def($def) {
 	if($def) {
-		desc("\tDefense :^777777 $def^000000");
+		desc("\tDefense :^777777 $def^000000" . "\r\n");
 	}
 }
 
 function item_weight($weight) {
 	if($weight != "") {
 		$weight = $weight / 10;
-		desc("\tWeight :^777777 $weight^000000");
+		desc("\tWeight :^777777 $weight^000000" . "\r\n");
 	}
 }
 
@@ -201,15 +200,15 @@ function item_type($type, $view, $loc) {
 	if($dtype) {
 		if($type == 4) { // weapon
 			$view = $weapons[$view];
-			desc("\tType :^777777 $dtype - $view ^000000");
+			desc("\tType :^777777 $dtype - $view ^000000" . "\r\n");
 		} elseif($type == 5) { // armor
 			$view = $locations[$loc];
-			desc("\tType :^777777 $dtype - $view ^000000");
+			desc("\tType :^777777 $dtype - $view ^000000" . "\r\n");
 		} elseif($type == 10) { // ammo
 			$view = $ammo[$view];
-			desc("\tType :^777777 $dtype - $view ^000000");
+			desc("\tType :^777777 $dtype - $view ^000000" . "\r\n");
 		} else {
-			desc("\tType :^777777 $dtype^000000");
+			desc("\tType :^777777 $dtype^000000" . "\r\n");
 		}
 	} else {
 		echo "unknown item type $type\r\n";
