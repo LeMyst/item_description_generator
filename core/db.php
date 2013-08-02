@@ -9,7 +9,7 @@ function param_split($line, $parse_bracket = 1) {
 	$start = 0;
 	$in_bracket = 0;
 	$in_string = 0;
-	for($ptr = 0; $ptr < $len; $ptr++) {
+	for($ptr = 0; $ptr <= $len; $ptr++) {
 		if( $parse_bracket && $line{$ptr} == '{' ) {
 			$in_bracket++;
 		} else if( $parse_bracket && $line{$ptr} == '}' ) {
@@ -21,19 +21,23 @@ function param_split($line, $parse_bracket = 1) {
 		} else if( $line{$ptr} == '"' ) {
 			$in_string = !$in_string;
 		} else if( $line{$ptr} == ',' && !$in_bracket && !$in_string) {
-			$value = trim(substr($line, $start, $ptr-$start));
-			$value = const_v($value);
+			$value = strtolower(trim(substr($line, $start, $ptr-$start)));
+			#$value = const_v($value);
 			$params[] = $value;
 			$start = $ptr + 1;
 		} else if( $line{$ptr} == ';' && !$in_bracket && !$in_string ) {
+			if( ($len-$start) > 0 ) {
+				$value = strtolower(trim(substr($line, $start, $ptr-$start)));
+				#$value = const_v($value);
+				$params[] = $value;
+			}
 			break;
 		}
 	}
-	if( ($len-$start) > 0 ) {
-		$value = substr($line, $start);
-		$value = const_v($value);
-		$params[] = $value;
-	}
+	#print_r($params);
+	#echo "line = $line\n";
+	#echo "len = $len , ptr = $ptr , start = $start , remain = " . substr($line, $start);
+	#die();
 	return $params;
 }
 

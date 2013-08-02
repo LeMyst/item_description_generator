@@ -34,17 +34,25 @@ $error = fopen($error, 'w') or exit("Unable to open $error");
 # Global Vars
 #############
 $item_id = 0;
-$count = 2000;
+$count = 100;
 
 
 # Loop every item in item_db.txt
-while (!feof($item_db)) {
-#for($i = 0; $i <= $count; $i++){
+#while (!feof($item_db)) {
+for($i = 0; $i <= $count; $i++){
 	#echo "$i\r\n";
 	$line = fgets($item_db);
 	if(preg_match('/(\d*),(\D*?),(\D*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(.*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),(\d*?),\{(.*?)\},\{(.*?)\},\{(.*?)\}/', $line, $m)) {
 		// ID,AegisName,Name,Type,Buy,Sell,Weight,ATK,MATK,DEF,Range,Slots,Job,Upper,Gender,Loc,wLV,eLV,Refineable,View,{ Script },{ OnEquip_Script },{ OnUnequip_Script }
 		// 1  2         3    4    5   6    7      8   9    10  11    12    13  14    15     16  17  18  19         20     21          22                23
+		#desc($m[1].','.$m[2].','.$m[3].','.$m[4].','.$m[5].','.$m[6].','.$m[7].',');
+		#if($m[9])
+		#	desc($m[8].':'.$m[9]);
+		#else
+		#	desc($m[8]);
+		#desc(','.$m[10].','.$m[11].','.$m[12].','.$m[13].','.$m[14].','.$m[15].','.$m[16].','.$m[17].','.$m[18].','.$m[19].','.$m[20].',');
+		#desc('{'.$m[21].'},{'.$m[22].'},{'.$m[23]."}\r\n");
+		
 		$item_id = $m[1];
 		desc($m[2] . " {");
 			item_script($m[21]);

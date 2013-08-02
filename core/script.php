@@ -158,10 +158,10 @@ function statement_parser($statement){
 			break;
 	}
 	$params = param_split( substr($statement, $ptr+1), 1);
-	$i = count($params) - 1;
+	#$i = count($params) - 1;
 	//print_r($params);
-	$params[$i] = substr($params[$i], 0, strpos($params[$i], ';'));
-	$params[$i] = const_v($params[$i]);
+	#$params[$i] = substr($params[$i], 0, strpos($params[$i], ';'));
+	#$params[$i] = const_v($params[$i]);
 	
 	return $parser($cmd, $params);
 }
@@ -213,6 +213,8 @@ function parse_sc($cmd, $params) {
 	if( $cmd == 'sc_end' ) {
 		return bonus_sc_end($params[0]);
 	} else {
+		if($params[1] == "-1")
+			die("HERE");
 		$params[1] = secondsToTime($params[1]/1000);
 		if( $params[2] !== "0" ) {
 			return bonus_sc_start2($params[0], $params[1], $params[2]);
